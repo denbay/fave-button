@@ -64,7 +64,8 @@ open class FaveButton: UIButton {
     fileprivate var faveIconImage:UIImage?
     fileprivate var faveIcon: FaveIcon!
     fileprivate var animationsEnabled = true
-    
+    fileprivate var canUnselected = true
+
     override open var isSelected: Bool {
         didSet{
             guard self.animationsEnabled else {
@@ -94,10 +95,13 @@ open class FaveButton: UIButton {
         applyInit()
     }
     
-    public func setSelected(selected: Bool, animated: Bool) {
+    public func setSelected(selected: Bool, animated: Bool, canUnselected: Bool) {
+        self.canUnselected = canUnselected
+        
         guard selected != self.isSelected else {
             return
         }
+        
         guard animated == false else {
             self.isSelected = selected
             return
@@ -190,8 +194,12 @@ extension FaveButton{
         self.addTarget(self, action: #selector(toggle(_:)), for: .touchUpInside)
     }
     
-    @objc func toggle(_ sender: FaveButton){
-        sender.isSelected = !sender.isSelected
+    @objc func toggle(_ sender: FaveButton) {
+        if canUnselected || !sender.isSelected {
+            sender.isSelected = !sender.isSelected
+        } else if !canUnselected {
+            sender.isSelected = true
+        }
         
         guard case let delegate as FaveButtonDelegate = self.delegate else{
             return
